@@ -1,0 +1,41 @@
+plugins {
+  id 'org.springframework.boot' version '2.5.3'
+	id 'io.spring.dependency-management' version '1.0.11.RELEASE'
+	id "org.openapi.generator" version "5.1.1"
+  id 'java'
+}
+
+apply from: "${rootDir}/repos.gradle"
+
+openApiGenerate {
+    generatorName = "spring"
+    inputSpec = "$projectDir/PetShop.yaml".toString()
+    outputDir = "$buildDir/generated".toString()
+    apiPackage = "com.phoebelord.petshop.generated.api"
+    modelPackage = "com.phoebelord.petshop.generated.model"
+    configOptions = [
+        dateLibrary: "java8",
+				interfaceOnly: "true",
+				unhandledException: "true"
+    ]
+}
+
+sourceSets.main.java.srcDir "${buildDir}/generated/src/main/java"
+
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.springframework.boot:spring-boot-starter-validation'
+  implementation 'io.springfox:springfox-swagger2:3.0.0'
+  implementation 'org.openapitools:jackson-databind-nullable:0.2.1'
+}
+
+bootJar {
+  enabled = false
+}
+
+jar {
+  enabled = true
+}
+
+tasks.openApiGenerate.dependsOn clean
+compileJava.dependsOn tasks.openApiGenerate
